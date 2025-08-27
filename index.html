@@ -45,9 +45,9 @@
     <div class="col col-2"><label>Series Title <input type="text" id="seriesTitle" value="Event"></label></div>
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
     <div class="col col-2"><label>Timezone <select id="seriesTimezone">
-  <option value="">Select Timezone</option>
-    </select>
-      <!-- <input type="text" id="seriesTimezone" list="timezones" value="Europe/Helsinki"> --> </label></div>
+          <option value="">Select Timezone</option>
+        </select></label></div>
+      <!-- <input type="text" id="seriesTimezone" list="timezones" value="Europe/Helsinki"> --> 
   </div>
   <div class="row">
     <div class="col col-2"><label>Default Start Time <input type="time" id="seriesStartTime"></label></div>
@@ -109,26 +109,22 @@ function addEvent() {
 }
   
 let timezonesData = []; // Will hold the JSON data
+
+  
+// Load the JSON file
+
 fetch('./timezones.json')
-  .then(response => response.json())
+  .then(resp => resp.json())
   .then(timezones => {
-    const timezoneSelect = document.getElementById('series-timezone');
+    const datalist = document.getElementById('timezones');
     timezones.forEach(tz => {
       const option = document.createElement('option');
       option.value = tz.timezone;
       option.textContent = `${tz.city}, ${tz.countryName}`;
-      timezoneSelect.appendChild(option);
+      datalist.appendChild(option);
     });
   })
-  .catch(error => console.error('Error loading timezones:', error));
-  
-// Load the JSON file
-/*fetch('./timezones.json')
-  .then(response => response.json())
-  .then(data => {
-    timezonesData = data;
-
-    const datalist = document.getElementById('timezones');
+  .catch(err => console.error('Failed to load timezones:', err));
 
     // Populate the datalist
     timezonesData.forEach(tz => {
@@ -141,7 +137,18 @@ fetch('./timezones.json')
     // Set default series timezone
     const seriesInput = document.getElementById('seriesTimezone');
     const defaultTZ = 'Europe/Helsinki'; // default preferred timezone
-    seriesInput.value = defaultTZ;
+    serifetch('./timezones.json')
+  .then(response => response.json())
+  .then(timezones => {
+    const timezoneSelect = document.getElementById('series-timezone');
+    timezones.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz.timezone;
+      option.textContent = `${tz.city}, ${tz.countryName}`;
+      timezoneSelect.appendChild(option);
+    });
+  })
+  .catch(error => console.error('Error loading timezones:', error));esInput.value = defaultTZ;
   })
   .catch(err => console.error('Failed to load timezone JSON:', err));
 */
