@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICS Generator</title>
+<title>ICS Generator v3</title>
 <style>
   body { font-family: sans-serif; margin: 1rem; max-width: 1000px; padding: 1rem; background: #f5f5f5; }
   h1 { text-align: center; }
@@ -81,15 +81,33 @@ function addEvent() {
 
 container.appendChild(div);
 
-// Add accordion toggle functionality const toggle = div.querySelector('.accordion-toggle'); const content = div.querySelector('.accordion-content'); toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; }); }
+// Add accordion toggle functionality 
+  const toggle = div.querySelector('.accordion-toggle');
+  const content = div.querySelector('.accordion-content');
+  toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; }); }
 
-// Load timezone JSON fetch('./timezones.json').then(res => res.json()).then(data => { timezonesData = data; const seriesInput = document.getElementById('seriesTimezone'); data.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName}); seriesInput.appendChild(option); }); seriesInput.value = defaultTZ; }).catch(err => console.error('Failed to load timezone JSON:', err));
+// Load timezone JSON fetch
+  ('./timezones.json').then(res => res.json()).then(data => { timezonesData = data;
+                                                             const seriesInput = document.getElementById('seriesTimezone');
+                                                             data.forEach(tz => { const option = document.createElement('option');
+                                                                                 option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName});
+                                                             seriesInput.appendChild(option); }); seriesInput.value = defaultTZ; }).catch(err => console.error('Failed to load timezone JSON:', err));
 
-function generateICS() { const events = document.querySelectorAll('.event'); let ics = BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n; events.forEach((evt, i) => { const title = evt.querySelector('input[name="title"]').value; const date = evt.querySelector('input[name="date"]').value.replace(/-/g,''); const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00'; const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00'; const location = evt.querySelector('input[name="location"]').value; const desc = evt.querySelector('textarea[name="description"]').value; const tz = evt.querySelector('input[name="timezone"]').value; const uid = evt-${i}-${Date.now()}@icsgen; const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'; ics += BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n; }); ics += 'END:VCALENDAR'; const blob = new Blob([ics], { type: 'text/calendar' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'events.ics'; a.click(); URL.revokeObjectURL(url); }
+function generateICS() { const events = document.querySelectorAll('.event');
+                        let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
+                        events.forEach((evt, i) => { const title = evt.querySelector('input[name="title"]').value;
+                                                    const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
+                                                    const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00';
+                                                    const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00';
+                                                    const location = evt.querySelector('input[name="location"]').value; const desc = evt.querySelector('textarea[name="description"]').value;
+                                                    const tz = evt.querySelector('input[name="timezone"]').value; const uid = evt-${i}-${Date.now()}@icsgen; const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'; ics += BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n; }); ics += 'END:VCALENDAR'; const blob = new Blob([ics], { type: 'text/calendar' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'events.ics'; a.click(); URL.revokeObjectURL(url); }
 
-// Attach add event button document.getElementById('addEventBtn').addEventListener('click', addEvent);
+// Attach add event button
+  document.getElementById('addEventBtn').addEventListener('click', addEvent);
 
-// Add first event on DOM ready window.addEventListener('DOMContentLoaded', () => addEvent()); </script>
+// Add first event on DOM ready 
+  window.addEventListener('DOMContentLoaded', () => addEvent());
 
+</script>
 </body>
 </html>
