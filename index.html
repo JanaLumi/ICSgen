@@ -4,15 +4,32 @@
 <meta charset="UTF-8">
 <title>ICS Generator</title>
 <style>
-  body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; }
-  fieldset { margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; border: 1px solid #ddd; }
+  body {
+    font-family: sans-serif;
+    margin: 1rem;
+    max-width: 1000px;
+    padding: 1rem;
+    background: #f5f5f5;
+  }
+  h1 { text-align: center; }
+  fieldset { border-radius: 8px; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: #fff; }
   legend { font-weight: bold; }
   label { display: block; margin-top: 0.5rem; }
-  input, textarea, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; }
-  button { margin-top: 1rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
+  input, textarea, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; border-radius: 4px; border: 1px solid #ccc; }
+  input:focus, textarea:focus, select:focus { border-color: #2196F3; outline: none; box-shadow: 0 0 4px rgba(33,150,243,0.5); }
+  .event { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+  .event.slide-down { animation: slideDown 0.3s ease; }
+  @keyframes slideDown { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+  .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .col { flex: 1 1 100%; }
+  @media (min-width: 768px) {
+    .col-2 { flex: 1 1 48%; }
+    .col-3 { flex: 1 1 31%; }
+  }
+  button { margin-top: 1rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
   .add-btn { background: #4CAF50; color: white; }
-  .gen-btn { background: #2196F3; color: white; }
-  footer { margin-top: 2rem; font-size: 0.9rem; color: #555; }
+  .gen-btn { background: #2196F3; color: white; margin-left: 0.5rem; }
+  footer { margin-top: 2rem; font-size: 0.9rem; color: #555; text-align: center; }
 </style>
 </head>
 <body>
@@ -23,9 +40,11 @@
 <!-- Series-level defaults -->
 <fieldset>
   <legend>Series Defaults</legend>
-  <label>Series Title <input type="text" id="seriesTitle" value="Kasvuhuoneilmiö"></label>
-  <label>Location <input type="text" id="seriesLocation" value="Crazy Town Tampere, Pakkahuoneenaukio 2, 5th floor"></label>
-  <label>Online Link / URL <input type="text" id="seriesURL" placeholder="Optional meeting link"></label>
+  <div class="row">
+    <div class="col"><label>Series Title <input type="text" id="seriesTitle" value="Kasvohuoneilmiö"></label></div>
+    <div class="col"><label>Location <input type="text" id="seriesLocation" value="Crazy Town Tampere, Pakkahuoneenaukio 2, 5th floor"></label></div>
+  </div>
+  <label>Description <textarea id="seriesDescription" placeholder="Include meeting URL or notes here"></textarea></label>
 </fieldset>
 
 <div id="events"></div>
@@ -38,14 +57,6 @@
 </footer>
 
 <script>
-// curated timezone list (~200), pinned at top
-const timezones = [
-  "Europe/Helsinki","Europe/Paris","Europe/Berlin","Europe/London","Europe/Madrid","Europe/Rome",
-  "Asia/Tokyo","Asia/Shanghai","Asia/Seoul","Asia/Singapore","Asia/Bangkok","Asia/Dubai",
-  "America/New_York","America/Chicago","America/Denver","America/Los_Angeles","America/Sao_Paulo","America/Toronto",
-  // … remaining zones alphabetically up to ~200
-];
-
 const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
 let eventCount = 0;
 
@@ -53,47 +64,42 @@ function addEvent() {
   eventCount++;
   const container = document.getElementById('events');
   const div = document.createElement('div');
-  div.className = 'event';
+  div.className = 'event slide-down';
 
   const seriesTitle = document.getElementById('seriesTitle').value;
   const seriesLocation = document.getElementById('seriesLocation').value;
-  const seriesURL = document.getElementById('seriesURL').value;
-
-  let tzOptions = timezones.map(tz => `<option value="${tz}" ${tz===defaultTZ?'selected':''}>${tz}</option>`).join('');
+  const seriesDesc = document.getElementById('seriesDescription').value;
 
   div.innerHTML = `
     <h3>Event ${eventCount}</h3>
-    <label>Title <input type="text" name="title" value="${seriesTitle}"></label>
-    <label>Date <input type="date" name="date"></label>
-    <label>Start Time <input type="time" name="start"></label>
-    <label>End Time <input type="time" name="end"></label>
-    <label>Location <input type="text" name="location" value="${seriesLocation}"></label>
-    <label>Online Link / URL <input type="text" name="url" value="${seriesURL}"></label>
-    <label>Description <textarea name="description"></textarea></label>
-    <label>Timezone <select name="timezone">${tzOptions}</select></label>
+    <div class="row">
+      <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
+      <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
+    </div>
+    <div class="row">
+      <div class="col col-2"><label>Date <input type="date" name="date"></label></div>
+      <div class="col col-2"><label>Start Time <input type="time" name="start"></label></div>
+      <div class="col col-2"><label>End Time <input type="time" name="end"></label></div>
+    </div>
+    <label>Description <textarea name="description">${seriesDesc}</textarea></label>
+    <label>Timezone <input type="text" name="timezone" value="${defaultTZ}"></label>
   `;
   container.appendChild(div);
 }
 
 function generateICS() {
-  const seriesTitle = document.getElementById('seriesTitle').value;
-  const seriesLocation = document.getElementById('seriesLocation').value;
-  const seriesURL = document.getElementById('seriesURL').value;
-
-  let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
   const events = document.querySelectorAll('.event');
+  let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
 
   events.forEach((evt, i) => {
-    const title = evt.querySelector('input[name="title"]').value || seriesTitle;
+    const title = evt.querySelector('input[name="title"]').value;
     const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
     const start = evt.querySelector('input[name="start"]').value.replace(':','') + "00";
     const end = evt.querySelector('input[name="end"]').value.replace(':','') + "00";
-    const location = evt.querySelector('input[name="location"]').value || seriesLocation;
-    const url = evt.querySelector('input[name="url"]').value || seriesURL;
-    let desc = evt.querySelector('textarea[name="description"]').value || "";
-    if (url) desc += `\\nOnline: ${url}`;
+    const location = evt.querySelector('input[name="location"]').value;
+    const desc = evt.querySelector('textarea[name="description"]').value;
+    const tz = evt.querySelector('input[name="timezone"]').value;
 
-    const tz = evt.querySelector('select[name="timezone"]').value;
     const uid = `evt-${i}-${Date.now()}@icsgen`;
     const dtstamp = new Date().toISOString().replace(/[-:]/g,"").split('.')[0]+"Z";
 
