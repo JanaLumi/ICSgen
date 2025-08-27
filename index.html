@@ -48,11 +48,6 @@
   <label>Description <textarea id="seriesDescription" placeholder="Include meeting URL or notes here"></textarea></label>
 </fieldset>
 
-<div id="events"></div>
-
-<button class="add-btn" onclick="addEvent()">+ Add Event</button>
-<button class="gen-btn" onclick="generateICS()">Generate ICS</button>
-
 <!-- Datalist for full timezone list -->
 <datalist id="timezones">
   <option value="Europe/Helsinki">
@@ -71,4 +66,89 @@
   <option value="America/Chicago">
   <option value="America/Denver">
   <option value="America/Los_Angeles">
-  <option value
+  <option value="America/Sao_Paulo">
+  <option value="America/Toronto">
+  <!-- add remaining IANA timezones here -->
+</datalist>
+
+<div id="events"></div>
+
+<button class="add-btn" onclick="addEvent()">+ Add Event</button>
+<button class="gen-btn" onclick="generateICS()">Generate ICS</button>
+
+<footer>
+  Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
+</footer>
+
+<script>
+const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
+let eventCount = 0;
+
+function escapeHTML(str) {
+  if(!str) return '';
+  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
+}
+
+function addEvent() {
+  eventCount++;
+  const container = document.getElementById('events');
+  const div = document.createElement('div');
+  div.className = 'event slide-down';
+
+  const seriesTitle = escapeHTML(document.getElementById('seriesTitle').value);
+  const seriesLocation = escapeHTML(document.getElementById('seriesLocation').value);
+  const seriesDesc = escapeHTML(document.getElementById('seriesDescription').value);
+
+  div.innerHTML = `
+    <h3>Event ${eventCount}</h3>
+    <div class="row">
+      <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
+      <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
+      <div class="col col-2"><label>Timezone <input type="text" name="timezone" list="timezones" value="${defaultTZ}"></label></div>
+    </div>
+    <div class="row">
+      <div class="col col-2"><label>Date <input type="date" name="date"></label></div>
+      <div class="col col-2"><label>Start Time <input type="time" name="start"></label></div>
+      <div class="col col-2"><label>End Time <input type="time" name="end"></label></div>
+    </div>
+    <label>Description <textarea name="description">${seriesDesc}</textarea></label>
+  `;
+  container.appendChild(div);
+}
+
+// Generate ICS
+function generateICS() {
+  const events = document.querySelectorAll('.event');
+  let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
+
+  events.forEach((evt, i) => {
+    const title = evt.querySelector('input[name="title"]').value;
+    const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
+    const start = evt.querySelector('input[name="start"]').value.replace(':','') + "00";
+    const end = evt.querySelector('input[name="end"]').value.replace(':','') + "00";
+    const location = evt.querySelector('input[name="location"]').value;
+    const desc = evt.querySelector('textarea[name="description"]').value;
+    const tz = evt.querySelector('input[name="timezone"]').value;
+
+    const uid = `evt-${i}-${Date.now()}@icsgen`;
+    const dtstamp = new Date().toISOString().replace(/[-:]/g,"").split('.')[0]+"Z";
+
+    ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
+  });
+
+  ics += "END:VCALENDAR";
+
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "events.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Add first event after DOM is ready
+window.addEventListener('DOMContentLoaded', () => addEvent());
+</script>
+</body>
+</html>
