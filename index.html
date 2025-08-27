@@ -44,7 +44,10 @@
   <div class="row">
     <div class="col col-2"><label>Series Title <input type="text" id="seriesTitle" value="Event"></label></div>
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
-    <div class="col col-2"><label>Timezone <input type="text" id="seriesTimezone" list="timezones" value="Europe/Helsinki"></label></div>
+    <div class="col col-2"><label>Timezone <select id="seriesTimezone">
+  <option value="">Select Timezone</option>
+    </select>
+      <!-- <input type="text" id="seriesTimezone" list="timezones" value="Europe/Helsinki"> --> </label></div>
   </div>
   <div class="row">
     <div class="col col-2"><label>Default Start Time <input type="time" id="seriesStartTime"></label></div>
