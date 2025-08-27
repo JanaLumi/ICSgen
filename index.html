@@ -24,7 +24,7 @@
   footer { margin-top: 2rem; font-size: 0.9rem; color: #555; text-align: center; }
 </style>
 </head>
-<body><h1>ICS File Generator v4</h1>
+<body><h1>ICS File Generator v5</h1>
 <p style="font-size:0.9rem; color:#555;">Note: Timezones are a colonial standard. Provided for practical scheduling globally.</p><fieldset>
   <legend>Series Defaults</legend>
   <div class="row">
@@ -154,9 +154,7 @@ function propagateDefaults() {
       endField.setAttribute("data-default", end);
     }
   });
-}                                                                                 option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName});
-                                                             seriesInput.appendChild(option); }); seriesInput.value = defaultTZ; }).catch(err => console.error('Failed to load timezone JSON:', err));
-
+}         
 
 </script>
 </body>
