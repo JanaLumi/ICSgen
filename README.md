@@ -1,5 +1,7 @@
 # ICS File Generator
 
+[Demo](https://icsmaker.netlify.app)
+
 A simple web-based ICS file generator that allows users to create calendar events with default series settings and individual event overrides. Designed with a clean UI, mobile support, and accordion-style event details for a less cluttered experience.
 
 ## Features
