@@ -106,9 +106,21 @@ function addEvent() {
 }
   
 let timezonesData = []; // Will hold the JSON data
-
-// Load the JSON file
 fetch('./timezones.json')
+  .then(response => response.json())
+  .then(timezones => {
+    const timezoneSelect = document.getElementById('series-timezone');
+    timezones.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz.timezone;
+      option.textContent = `${tz.city}, ${tz.countryName}`;
+      timezoneSelect.appendChild(option);
+    });
+  })
+  .catch(error => console.error('Error loading timezones:', error));
+  
+// Load the JSON file
+/*fetch('./timezones.json')
   .then(response => response.json())
   .then(data => {
     timezonesData = data;
@@ -129,7 +141,8 @@ fetch('./timezones.json')
     seriesInput.value = defaultTZ;
   })
   .catch(err => console.error('Failed to load timezone JSON:', err));
-
+*/
+  
 // When adding an event, the timezone input still refers to the same datalist
 function addEvent() {
   const container = document.getElementById('events');
