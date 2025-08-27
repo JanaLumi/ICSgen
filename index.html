@@ -24,7 +24,7 @@
   footer { margin-top: 2rem; font-size: 0.9rem; color: #555; text-align: center; }
 </style>
 </head>
-<body><h1>ICS File Generator v5</h1>
+<body><h1>ICS File Generator v6</h1>
 <p style="font-size:0.9rem; color:#555;">Note: Timezones are a colonial standard. Provided for practical scheduling globally.</p><fieldset>
   <legend>Series Defaults</legend>
   <div class="row">
@@ -79,83 +79,52 @@ function addEvent() {
 
 `;
 
-container.appendChild(div);
+  container.appendChild(div);
 
-// Add accordion toggle functionality 
+  // Add accordion toggle functionality
   const toggle = div.querySelector('.accordion-toggle');
   const content = div.querySelector('.accordion-content');
-  toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; }); }
+  toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; });
+}
 
-// Load timezone JSON fetch
-  ('./timezones.json').then(res => res.json()).then(data => { timezonesData = data;
-                                                             const seriesInput = document.getElementById('seriesTimezone');
-                                                             data.forEach(tz => { const option = document.createElement('option');
-// Generate ICS
+// Load timezone JSON
+fetch('./timezones.json').then(res => res.json()).then(data => {
+  timezonesData = data;
+  const seriesInput = document.getElementById('seriesTimezone');
+  data.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = `${tz.city} (${tz.countryName})`; seriesInput.appendChild(option); });
+  seriesInput.value = defaultTZ;
+}).catch(err => console.error('Failed to load timezone JSON:', err));
+
 function generateICS() {
   const events = document.querySelectorAll('.event');
   let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
-
   events.forEach((evt, i) => {
     const title = evt.querySelector('input[name="title"]').value;
     const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
-    const start = evt.querySelector('input[name="start"]').value.replace(':','') + "00";
-    const end = evt.querySelector('input[name="end"]').value.replace(':','') + "00";
+    const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00';
+    const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00';
     const location = evt.querySelector('input[name="location"]').value;
     const desc = evt.querySelector('textarea[name="description"]').value;
     const tz = evt.querySelector('input[name="timezone"]').value;
-
     const uid = `evt-${i}-${Date.now()}@icsgen`;
-    const dtstamp = new Date().toISOString().replace(/[-:]/g,"").split('.')[0]+"Z";
-
+    const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
     ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
   });
-
-  ics += "END:VCALENDAR";
-
+  ics += 'END:VCALENDAR';
   const blob = new Blob([ics], { type: 'text/calendar' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = "events.ics";
+  a.download = 'events.ics';
   a.click();
   URL.revokeObjectURL(url);
 }
 
-// Add first event after DOM is ready
+// Attach add event button
+document.getElementById('addEventBtn').addEventListener('click', addEvent);
+
+// Add first event on DOM ready
 window.addEventListener('DOMContentLoaded', () => addEvent());
-
-// Watch for changes in default fields and propagate to all events
-document.getElementById("defaultTimezone").addEventListener("change", propagateDefaults);
-document.getElementById("defaultStartTime").addEventListener("change", propagateDefaults);
-document.getElementById("defaultEndTime").addEventListener("change", propagateDefaults);
-
-function propagateDefaults() {
-  const tz = document.getElementById("defaultTimezone").value;
-  const start = document.getElementById("defaultStartTime").value;
-  const end = document.getElementById("defaultEndTime").value;
-
-  document.querySelectorAll(".event").forEach(eventDiv => {
-    // Only update if the field is empty or matches the previous default
-    const tzField = eventDiv.querySelector(".timezone");
-    if (tz && (!tzField.value || tzField.value === tzField.getAttribute("data-default"))) {
-      tzField.value = tz;
-      tzField.setAttribute("data-default", tz);
-    }
-
-    const startField = eventDiv.querySelector(".start-time");
-    if (start && (!startField.value || startField.value === startField.getAttribute("data-default"))) {
-      startField.value = start;
-      startField.setAttribute("data-default", start);
-    }
-
-    const endField = eventDiv.querySelector(".end-time");
-    if (end && (!endField.value || endField.value === endField.getAttribute("data-default"))) {
-      endField.value = end;
-      endField.setAttribute("data-default", end);
-    }
-  });
-}         
-
 </script>
 </body>
 </html>
