@@ -72,10 +72,15 @@
 
 const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
 let eventCount = 0;
+let timezonesData = []; // Will hold the JSON data
 
 function escapeHTML(str) {
-  if(!str) return '';
-  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
+  if (!str) return '';
+  return str.replaceAll('&','&amp;')
+            .replaceAll('<','&lt;')
+            .replaceAll('>','&gt;')
+            .replaceAll('"','&quot;')
+            .replaceAll("'", '&#39;');
 }
 
 function addEvent() {
@@ -105,26 +110,16 @@ function addEvent() {
     </div>
     <label>Description <textarea name="description">${seriesDesc}</textarea></label>
   `;
+
   container.appendChild(div);
 }
-  
-let timezonesData = []; // Will hold the JSON data
 
-  
-// Load the JSON file
-
+// Load the JSON file for timezones
 fetch('./timezones.json')
-  .then(resp => resp.json())
-  .then(timezones => {
+  .then(response => response.json())
+  .then(data => {
+    timezonesData = data;
     const datalist = document.getElementById('timezones');
-    timezones.forEach(tz => {
-      const option = document.createElement('option');
-      option.value = tz.timezone;
-      option.textContent = `${tz.city}, ${tz.countryName}`;
-      datalist.appendChild(option);
-    });
-  })
-  .catch(err => console.error('Failed to load timezones:', err));
 
     // Populate the datalist
     timezonesData.forEach(tz => {
@@ -136,56 +131,9 @@ fetch('./timezones.json')
 
     // Set default series timezone
     const seriesInput = document.getElementById('seriesTimezone');
-    const defaultTZ = 'Europe/Helsinki'; // default preferred timezone
-    serifetch('./timezones.json')
-  .then(response => response.json())
-  .then(timezones => {
-    const timezoneSelect = document.getElementById('series-timezone');
-    timezones.forEach(tz => {
-      const option = document.createElement('option');
-      option.value = tz.timezone;
-      option.textContent = `${tz.city}, ${tz.countryName}`;
-      timezoneSelect.appendChild(option);
-    });
-  })
-  .catch(error => console.error('Error loading timezones:', error));esInput.value = defaultTZ;
+    seriesInput.value = defaultTZ;
   })
   .catch(err => console.error('Failed to load timezone JSON:', err));
-*/
-  
-// When adding an event, the timezone input still refers to the same datalist
-function addEvent() {
-  const container = document.getElementById('events');
-  const div = document.createElement('div');
-  div.className = 'event slide-down';
-
-  const seriesTitle = document.getElementById('seriesTitle').value;
-  const seriesLocation = document.getElementById('seriesLocation').value;
-  const seriesDesc = document.getElementById('seriesDescription').value;
-  const seriesTZ = document.getElementById('seriesTimezone').value;
-  const seriesStart = document.getElementById('seriesStartTime').value || '';
-  const seriesEnd = document.getElementById('seriesEndTime').value || '';
-
-  div.innerHTML = `
-    <h3>Event</h3>
-    <div class="row">
-      <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
-      <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
-      <div class="col col-2"><label>Timezone <input type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
-    </div>
-    <div class="row">
-      <div class="col col-2"><label>Date <input type="date" name="date"></label></div>
-      <div class="col col-2"><label>Start Time <input type="time" name="start" value="${seriesStart}"></label></div>
-      <div class="col col-2"><label>End Time <input type="time" name="end" value="${seriesEnd}"></label></div>
-    </div>
-    <label>Description <textarea name="description">${seriesDesc}</textarea></label>
-  `;
-
-  container.appendChild(div);
-}
-
-// Add first event on page load
-window.addEventListener('DOMContentLoaded', () => addEvent());
 
 // Generate ICS
 function generateICS() {
