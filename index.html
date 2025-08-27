@@ -197,6 +197,40 @@ function generateICS() {
 
 // Add first event after DOM is ready
 window.addEventListener('DOMContentLoaded', () => addEvent());
+
+// Watch for changes in default fields and propagate to all events
+document.getElementById("defaultTimezone").addEventListener("change", propagateDefaults);
+document.getElementById("defaultStartTime").addEventListener("change", propagateDefaults);
+document.getElementById("defaultEndTime").addEventListener("change", propagateDefaults);
+
+function propagateDefaults() {
+  const tz = document.getElementById("defaultTimezone").value;
+  const start = document.getElementById("defaultStartTime").value;
+  const end = document.getElementById("defaultEndTime").value;
+
+  document.querySelectorAll(".event").forEach(eventDiv => {
+    // Only update if the field is empty or matches the previous default
+    const tzField = eventDiv.querySelector(".timezone");
+    if (tz && (!tzField.value || tzField.value === tzField.getAttribute("data-default"))) {
+      tzField.value = tz;
+      tzField.setAttribute("data-default", tz);
+    }
+
+    const startField = eventDiv.querySelector(".start-time");
+    if (start && (!startField.value || startField.value === startField.getAttribute("data-default"))) {
+      startField.value = start;
+      startField.setAttribute("data-default", start);
+    }
+
+    const endField = eventDiv.querySelector(".end-time");
+    if (end && (!endField.value || endField.value === endField.getAttribute("data-default"))) {
+      endField.value = end;
+      endField.setAttribute("data-default", end);
+    }
+  });
+}
+  
+
 </script>
 </body>
 </html>
