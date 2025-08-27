@@ -4,35 +4,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ICS Generator</title>
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 1rem;
-    max-width: 1000px;
-    padding: 1rem;
-    background: #f5f5f5;
-  }
+  body { font-family: sans-serif; margin: 1rem; max-width: 1000px; padding: 1rem; background: #f5f5f5; }
   h1 { text-align: center; }
   fieldset { border-radius: 8px; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: #fff; }
   legend { font-weight: bold; }
   label { display: block; margin-top: 0.5rem; }
   input, textarea, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; border-radius: 4px; border: 1px solid #ccc; }
   input:focus, textarea:focus, select:focus { border-color: #2196F3; outline: none; box-shadow: 0 0 4px rgba(33,150,243,0.5); }
-  .event { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s ease; }
-  .event.slide-down { animation: slideDown 0.3s ease; }
-  @keyframes slideDown { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+  .event { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .accordion-content { display: none; margin-top: 0.5rem; }
+  .accordion-toggle { cursor: pointer; font-weight: bold; margin-bottom: 0.5rem; display: block; }
+  .highlight-date { background-color: #fffbcc; padding: 0.2rem; border-radius: 4px; }
   .row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .col { flex: 1 1 100%; }
-  @media (min-width: 768px) {
-    .col-2 { flex: 1 1 48%; }
-    .col-3 { flex: 1 1 31%; }
-  }
+  @media (min-width: 768px) { .col-2 { flex: 1 1 48%; } .col-3 { flex: 1 1 31%; } }
   button { margin-top: 1rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
   .add-btn { background: #4CAF50; color: white; }
   .gen-btn { background: #2196F3; color: white; margin-left: 0.5rem; }
-  .date-label { background: #fffae6; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; display: block; margin-bottom: 0.5rem; }
-  .accordion-toggle { cursor: pointer; color: #2196F3; font-weight: bold; margin-bottom: 0.5rem; }
-  .accordion-content { display: none; }
-  .accordion-content.active { display: block; }
   footer { margin-top: 2rem; font-size: 0.9rem; color: #555; text-align: center; }
 </style>
 </head>
@@ -49,23 +37,22 @@
     <div class="col col-2"><label>Default End Time <input type="time" id="seriesEndTime"></label></div>
   </div>
   <label>Description <textarea id="seriesDescription" placeholder="Include meeting URL or notes here"></textarea></label>
-</fieldset><div id="events"></div><button class="add-btn" onclick="addEvent()">+ Add Event</button> <button class="gen-btn" onclick="generateICS()">Generate ICS</button>
-
-<footer>Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a></footer><script>
+</fieldset><div id="events"></div>
+<button class="add-btn" id="addEventBtn">+ Add Event</button>
+<button class="gen-btn" onclick="generateICS()">Generate ICS</button><footer>
+  Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
+</footer><script>
 const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
 let eventCount = 0;
 let timezonesData = [];
 
-function escapeHTML(str) {
-  if (!str) return '';
-  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
-}
+function escapeHTML(str) { if (!str) return ''; return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;'); }
 
 function addEvent() {
   eventCount++;
   const container = document.getElementById('events');
   const div = document.createElement('div');
-  div.className = 'event slide-down';
+  div.className = 'event';
 
   const seriesTitle = escapeHTML(document.getElementById('seriesTitle').value);
   const seriesLocation = escapeHTML(document.getElementById('seriesLocation').value);
@@ -75,8 +62,9 @@ function addEvent() {
   const seriesEnd = document.getElementById('seriesEndTime').value || '';
 
   div.innerHTML = `
-    <div class="date-label">Date (required)</div>
-    <div class="accordion-toggle">Show/Hide Details</div>
+    <h3>Event ${eventCount}</h3>
+    <label class="highlight-date">Date <input type="date" name="date" required></label>
+    <span class="accordion-toggle">Show/Hide Details</span>
     <div class="accordion-content">
       <div class="row">
         <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
@@ -93,68 +81,15 @@ function addEvent() {
 
 container.appendChild(div);
 
-const toggle = div.querySelector('.accordion-toggle'); const content = div.querySelector('.accordion-content'); toggle.addEventListener('click', () => content.classList.toggle('active')); }
+// Add accordion toggle functionality const toggle = div.querySelector('.accordion-toggle'); const content = div.querySelector('.accordion-content'); toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; }); }
 
-// Load timezones fetch('./timezones.json') .then(res => res.json()) .then(data => { timezonesData = data; const tzSelect = document.getElementById('seriesTimezone'); timezonesData.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName}); tzSelect.appendChild(option); }); tzSelect.value = defaultTZ; }).catch(err => console.error(err));
+// Load timezone JSON fetch('./timezones.json').then(res => res.json()).then(data => { timezonesData = data; const seriesInput = document.getElementById('seriesTimezone'); data.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName}); seriesInput.appendChild(option); }); seriesInput.value = defaultTZ; }).catch(err => console.error('Failed to load timezone JSON:', err));
 
-function generateICS() { const events = document.querySelectorAll('.event'); let ics = BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n;
+function generateICS() { const events = document.querySelectorAll('.event'); let ics = BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n; events.forEach((evt, i) => { const title = evt.querySelector('input[name="title"]').value; const date = evt.querySelector('input[name="date"]').value.replace(/-/g,''); const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00'; const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00'; const location = evt.querySelector('input[name="location"]').value; const desc = evt.querySelector('textarea[name="description"]').value; const tz = evt.querySelector('input[name="timezone"]').value; const uid = evt-${i}-${Date.now()}@icsgen; const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'; ics += BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n; }); ics += 'END:VCALENDAR'; const blob = new Blob([ics], { type: 'text/calendar' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'events.ics'; a.click(); URL.revokeObjectURL(url); }
 
-events.forEach((evt, i) => { const title = evt.querySelector('input[name="title"]').value; const date = evt.querySelector('input[name="start"]').closest('.row').querySelector('input[type="date"]')?.value?.replace(/-/g,'') || ''; const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00'; const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00'; const location = evt.querySelector('input[name="location"]').value; const desc = evt.querySelector('textarea[name="description"]').value; const tz = evt.querySelector('input[name="timezone"]').value;
+// Attach add event button document.getElementById('addEventBtn').addEventListener('click', addEvent);
 
-const uid = `evt-${i}-${Date.now()}@icsgen`;
-const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+// Add first event on DOM ready window.addEventListener('DOMContentLoaded', () => addEvent()); </script>
 
-ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
-
-});
-
-ics += "END:VCALENDAR";
-
-  const blob = new Blob([ics], { type: 'text/calendar' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "events.ics";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Add first event after DOM is ready
-window.addEventListener('DOMContentLoaded', () => addEvent());
-
-// Watch for changes in default fields and propagate to all events
-document.getElementById("defaultTimezone").addEventListener("change", propagateDefaults);
-document.getElementById("defaultStartTime").addEventListener("change", propagateDefaults);
-document.getElementById("defaultEndTime").addEventListener("change", propagateDefaults);
-
-function propagateDefaults() {
-  const tz = document.getElementById("defaultTimezone").value;
-  const start = document.getElementById("defaultStartTime").value;
-  const end = document.getElementById("defaultEndTime").value;
-
-  document.querySelectorAll(".event").forEach(eventDiv => {
-    // Only update if the field is empty or matches the previous default
-    const tzField = eventDiv.querySelector(".timezone");
-    if (tz && (!tzField.value || tzField.value === tzField.getAttribute("data-default"))) {
-      tzField.value = tz;
-      tzField.setAttribute("data-default", tz);
-    }
-
-    const startField = eventDiv.querySelector(".start-time");
-    if (start && (!startField.value || startField.value === startField.getAttribute("data-default"))) {
-      startField.value = start;
-      startField.setAttribute("data-default", start);
-    }
-
-    const endField = eventDiv.querySelector(".end-time");
-    if (end && (!endField.value || endField.value === endField.getAttribute("data-default"))) {
-      endField.value = end;
-      endField.setAttribute("data-default", end);
-    }
-  });
-}
-  
-
-</script>
 </body>
 </html>
