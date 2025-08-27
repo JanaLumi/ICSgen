@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ICS Generator</title>
+<style>
+  body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; }
+  .event { border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+  label { display: block; margin-top: 0.5rem; }
+  input, textarea, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; }
+  button { margin-top: 1rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
+  .add-btn { background: #4CAF50; color: white; }
+  .gen-btn { background: #2196F3; color: white; }
+  footer { margin-top: 2rem; font-size: 0.9rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>ICS File Generator</h1>
+<p style="font-size:0.9rem; color:#555;">Note: Timezones are a colonial standard. We provide them for practical scheduling globally, but are aware this is a construct.</p>
+
+<div id="events"></div>
+
+<button class="add-btn" onclick="addEvent()">+ Add Event</button>
+<button class="gen-btn" onclick="generateICS()">Generate ICS</button>
+
+<footer>
+  Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
+</footer>
+
+<script>
+// curated timezone list (~200), pinned at top
+const timezones = [
+  "Europe/Helsinki","Europe/Paris","Europe/Berlin","Europe/London","Europe/Madrid","Europe/Rome",
+  "Asia/Tokyo","Asia/Shanghai","Asia/Seoul","Asia/Singapore","Asia/Bangkok","Asia/Dubai",
+  "America/New_York","America/Chicago","America/Denver","America/Los_Angeles","America/Sao_Paulo","America/Toronto",
+  // … add remaining zones alphabetically until ~200 total
+];
+
+// default to user timezone
+const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
+
+let eventCount = 0;
+
+function addEvent() {
+  eventCount++;
+  const container = document.getElementById('events');
+  const div = document.createElement('div');
+  div.className = 'event';
+  
+  // create timezone options
+  let tzOptions = timezones.map(tz => `<option value="${tz}" ${tz===defaultTZ?'selected':''}>${tz}</option>`).join('');
+  
+  div.innerHTML = `
+    <h3>Event ${eventCount}</h3>
+    <label>Title <input type="text" name="title"></label>
+    <label>Date <input type="date" name="date"></label>
+    <label>Start Time <input type="time" name="start"></label>
+    <label>End Time <input type="time" name="end"></label>
+    <label>Location <input type="text" name="location" value="Crazy Town Tampere, Pakkahuoneenaukio 2, 5th floor"></label>
+    <label>Description <textarea name="description"></textarea></label>
+    <label>Timezone <select name="timezone">${tzOptions}</select></label>
+  `;
+  container.appendChild(div);
+}
+
+function generateICS() {
+  let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
+  const events = document.querySelectorAll('.event');
+  
+  events.forEach((evt, i) => {
+    const title = evt.querySelector('input[name="title"]').value;
+    const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
+    const start = evt.querySelector('input[name="start"]').value.replace(':','') + "00";
+    const end = evt.querySelector('input[name="end"]').value.replace(':','') + "00";
+    const location = evt.querySelector('input[name="location"]').value;
+    const desc = evt.querySelector('textarea[name="description"]').value;
+    const tz = evt.querySelector('select[name="timezone"]').value;
+
+    const uid = `evt-${i}-${Date.now()}@icsgen`;
+    const dtstamp = new Date().toISOString().replace(/[-:]/g,"").split('.')[0]+"Z";
+
+    ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:Kasvuhuoneilmiö\nDESCRIPTION:${title}${desc ? "\\n"+desc : ""}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
+  });
+
+  ics += "END:VCALENDAR";
+
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "events.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// add first event by default
+addEvent();
+</script>
+</body>
+</html>
