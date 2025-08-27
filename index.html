@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,57 +29,36 @@
   button { margin-top: 1rem; padding: 0.6rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
   .add-btn { background: #4CAF50; color: white; }
   .gen-btn { background: #2196F3; color: white; margin-left: 0.5rem; }
+  .date-label { background: #fffae6; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; display: block; margin-bottom: 0.5rem; }
+  .accordion-toggle { cursor: pointer; color: #2196F3; font-weight: bold; margin-bottom: 0.5rem; }
+  .accordion-content { display: none; }
+  .accordion-content.active { display: block; }
   footer { margin-top: 2rem; font-size: 0.9rem; color: #555; text-align: center; }
 </style>
 </head>
-<body>
-
-<h1>ICS File Generator</h1>
-<p style="font-size:0.9rem; color:#555;">Note: Timezones are a colonial standard. Provided for practical scheduling globally.</p>
-
-<!-- Series-level defaults -->
-<fieldset>
+<body><h1>ICS File Generator</h1>
+<p style="font-size:0.9rem; color:#555;">Note: Timezones are a colonial standard. Provided for practical scheduling globally.</p><fieldset>
   <legend>Series Defaults</legend>
   <div class="row">
     <div class="col col-2"><label>Series Title <input type="text" id="seriesTitle" value="Event"></label></div>
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
-    <div class="col col-2"><label>Timezone <select id="seriesTimezone">
-          <option value="">Select Timezone</option>
-        </select></label></div>
-      <!-- <input type="text" id="seriesTimezone" list="timezones" value="Europe/Helsinki"> --> 
+    <div class="col col-2"><label>Timezone <select id="seriesTimezone"><option value="">Select Timezone</option></select></label></div>
   </div>
   <div class="row">
     <div class="col col-2"><label>Default Start Time <input type="time" id="seriesStartTime"></label></div>
     <div class="col col-2"><label>Default End Time <input type="time" id="seriesEndTime"></label></div>
   </div>
   <label>Description <textarea id="seriesDescription" placeholder="Include meeting URL or notes here"></textarea></label>
-</fieldset>
+</fieldset><div id="events"></div><button class="add-btn" onclick="addEvent()">+ Add Event</button> <button class="gen-btn" onclick="generateICS()">Generate ICS</button>
 
-<!-- Datalist for full timezone list -->
-<datalist id="timezones"></datalist>
-
-<div id="events"></div>
-
-<button class="add-btn" onclick="addEvent()">+ Add Event</button>
-<button class="gen-btn" onclick="generateICS()">Generate ICS</button>
-
-<footer>
-  Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
-</footer>
-
-<script>
-
+<footer>Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a></footer><script>
 const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
 let eventCount = 0;
-let timezonesData = []; // Will hold the JSON data
+let timezonesData = [];
 
 function escapeHTML(str) {
   if (!str) return '';
-  return str.replaceAll('&','&amp;')
-            .replaceAll('<','&lt;')
-            .replaceAll('>','&gt;')
-            .replaceAll('"','&quot;')
-            .replaceAll("'", '&#39;');
+  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
 }
 
 function addEvent() {
@@ -97,65 +75,40 @@ function addEvent() {
   const seriesEnd = document.getElementById('seriesEndTime').value || '';
 
   div.innerHTML = `
-    <h3>Event ${eventCount}</h3>
-    <div class="row">
-      <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
-      <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
-      <div class="col col-2"><label>Timezone <input type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
-    </div>
-    <div class="row">
-      <div class="col col-2"><label>Date <input type="date" name="date"></label></div>
-      <div class="col col-2"><label>Start Time <input type="time" name="start" value="${seriesStart}"></label></div>
-      <div class="col col-2"><label>End Time <input type="time" name="end" value="${seriesEnd}"></label></div>
-    </div>
-    <label>Description <textarea name="description">${seriesDesc}</textarea></label>
-  `;
+    <div class="date-label">Date (required)</div>
+    <div class="accordion-toggle">Show/Hide Details</div>
+    <div class="accordion-content">
+      <div class="row">
+        <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
+        <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
+        <div class="col col-2"><label>Timezone <input type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
+      </div>
+      <div class="row">
+        <div class="col col-2"><label>Start Time <input type="time" name="start" value="${seriesStart}"></label></div>
+        <div class="col col-2"><label>End Time <input type="time" name="end" value="${seriesEnd}"></label></div>
+      </div>
+      <label>Description <textarea name="description">${seriesDesc}</textarea></label></div>
 
-  container.appendChild(div);
-}
+`;
 
-// Load the JSON file for timezones
-fetch('./timezones.json')
-  .then(response => response.json())
-  .then(data => {
-    timezonesData = data;
-    const datalist = document.getElementById('timezones');
+container.appendChild(div);
 
-    // Populate the datalist
-    timezonesData.forEach(tz => {
-      const option = document.createElement('option');
-      option.value = tz.timezone;
-      option.textContent = `${tz.city} (${tz.countryName})`;
-      datalist.appendChild(option);
-    });
+const toggle = div.querySelector('.accordion-toggle'); const content = div.querySelector('.accordion-content'); toggle.addEventListener('click', () => content.classList.toggle('active')); }
 
-    // Set default series timezone
-    const seriesInput = document.getElementById('seriesTimezone');
-    seriesInput.value = defaultTZ;
-  })
-  .catch(err => console.error('Failed to load timezone JSON:', err));
+// Load timezones fetch('./timezones.json') .then(res => res.json()) .then(data => { timezonesData = data; const tzSelect = document.getElementById('seriesTimezone'); timezonesData.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = ${tz.city} (${tz.countryName}); tzSelect.appendChild(option); }); tzSelect.value = defaultTZ; }).catch(err => console.error(err));
 
-// Generate ICS
-function generateICS() {
-  const events = document.querySelectorAll('.event');
-  let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n`;
+function generateICS() { const events = document.querySelectorAll('.event'); let ics = BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n;
 
-  events.forEach((evt, i) => {
-    const title = evt.querySelector('input[name="title"]').value;
-    const date = evt.querySelector('input[name="date"]').value.replace(/-/g,'');
-    const start = evt.querySelector('input[name="start"]').value.replace(':','') + "00";
-    const end = evt.querySelector('input[name="end"]').value.replace(':','') + "00";
-    const location = evt.querySelector('input[name="location"]').value;
-    const desc = evt.querySelector('textarea[name="description"]').value;
-    const tz = evt.querySelector('input[name="timezone"]').value;
+events.forEach((evt, i) => { const title = evt.querySelector('input[name="title"]').value; const date = evt.querySelector('input[name="start"]').closest('.row').querySelector('input[type="date"]')?.value?.replace(/-/g,'') || ''; const start = evt.querySelector('input[name="start"]').value.replace(':','') + '00'; const end = evt.querySelector('input[name="end"]').value.replace(':','') + '00'; const location = evt.querySelector('input[name="location"]').value; const desc = evt.querySelector('textarea[name="description"]').value; const tz = evt.querySelector('input[name="timezone"]').value;
 
-    const uid = `evt-${i}-${Date.now()}@icsgen`;
-    const dtstamp = new Date().toISOString().replace(/[-:]/g,"").split('.')[0]+"Z";
+const uid = `evt-${i}-${Date.now()}@icsgen`;
+const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
 
-    ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
-  });
+ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
 
-  ics += "END:VCALENDAR";
+});
+
+ics += "END:VCALENDAR";
 
   const blob = new Blob([ics], { type: 'text/calendar' });
   const url = URL.createObjectURL(blob);
