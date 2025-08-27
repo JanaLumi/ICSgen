@@ -54,27 +54,7 @@
 </fieldset>
 
 <!-- Datalist for full timezone list -->
-<datalist id="timezones">
-  <option value="Europe/Helsinki">
-  <option value="Europe/Paris">
-  <option value="Europe/Berlin">
-  <option value="Europe/London">
-  <option value="Europe/Madrid">
-  <option value="Europe/Rome">
-  <option value="Asia/Tokyo">
-  <option value="Asia/Shanghai">
-  <option value="Asia/Seoul">
-  <option value="Asia/Singapore">
-  <option value="Asia/Bangkok">
-  <option value="Asia/Dubai">
-  <option value="America/New_York">
-  <option value="America/Chicago">
-  <option value="America/Denver">
-  <option value="America/Los_Angeles">
-  <option value="America/Sao_Paulo">
-  <option value="America/Toronto">
-  <!-- add remaining IANA timezones here -->
-</datalist>
+<datalist id="timezones"></datalist>
 
 <div id="events"></div>
 
@@ -86,29 +66,46 @@
 </footer>
 
 <script>
-const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
-let eventCount = 0;
+let timezonesData = []; // Will hold the JSON data
 
-function escapeHTML(str) {
-  if(!str) return '';
-  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
-}
+// Load the JSON file
+fetch('./timezones.json')
+  .then(response => response.json())
+  .then(data => {
+    timezonesData = data;
 
+    const datalist = document.getElementById('timezones');
+
+    // Populate the datalist
+    timezonesData.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz.timezone;
+      option.textContent = `${tz.city} (${tz.countryName})`;
+      datalist.appendChild(option);
+    });
+
+    // Set default series timezone
+    const seriesInput = document.getElementById('seriesTimezone');
+    const defaultTZ = 'Europe/Helsinki'; // default preferred timezone
+    seriesInput.value = defaultTZ;
+  })
+  .catch(err => console.error('Failed to load timezone JSON:', err));
+
+// When adding an event, the timezone input still refers to the same datalist
 function addEvent() {
-  eventCount++;
   const container = document.getElementById('events');
   const div = document.createElement('div');
   div.className = 'event slide-down';
 
-  const seriesTitle = escapeHTML(document.getElementById('seriesTitle').value);
-  const seriesLocation = escapeHTML(document.getElementById('seriesLocation').value);
-  const seriesDesc = escapeHTML(document.getElementById('seriesDescription').value);
-  const seriesTZ = escapeHTML(document.getElementById('seriesTimezone').value || defaultTZ);
+  const seriesTitle = document.getElementById('seriesTitle').value;
+  const seriesLocation = document.getElementById('seriesLocation').value;
+  const seriesDesc = document.getElementById('seriesDescription').value;
+  const seriesTZ = document.getElementById('seriesTimezone').value;
   const seriesStart = document.getElementById('seriesStartTime').value || '';
   const seriesEnd = document.getElementById('seriesEndTime').value || '';
 
   div.innerHTML = `
-    <h3>Event ${eventCount}</h3>
+    <h3>Event</h3>
     <div class="row">
       <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
       <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
@@ -121,8 +118,12 @@ function addEvent() {
     </div>
     <label>Description <textarea name="description">${seriesDesc}</textarea></label>
   `;
+
   container.appendChild(div);
 }
+
+// Add first event on page load
+window.addEventListener('DOMContentLoaded', () => addEvent());
 
 // Generate ICS
 function generateICS() {
