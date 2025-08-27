@@ -6,7 +6,7 @@
 <style>
   body { font-family: sans-serif; margin: 1rem; max-width: 1000px; padding: 1rem; background: #f5f5f5; }
   h1 { text-align: center; }
-  fieldset { border-radius: 8px; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: #fff; }
+  .default_head { border-radius: 8px; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; background: #fff; }
   legend { font-weight: bold; }
   label { display: block; margin-top: 0.5rem; }
   input, textarea, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; border-radius: 4px; border: 1px solid #ccc; }
@@ -26,8 +26,8 @@
 </head>
 <body><h1>ICS File Generator</h1>
 <p style="font-size:0.9rem; color:#555;">Note: Timezones are a European colonial standard, be mindful when expecting or demanding that others to use this.</p>
-  <fieldset>
-  <legend>Series Defaults</legend>
+  <div id="default_head">
+  <h2>Series Defaults</h2>
   <div class="row">
     <div class="col col-2"><label>Series Title <input type="text" id="seriesTitle" value="Event"></label></div>
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
@@ -38,7 +38,8 @@
     <div class="col col-2"><label>Default End Time <input type="time" id="seriesEndTime"></label></div>
   </div>
   <label>Description <textarea id="seriesDescription" placeholder="Include meeting URL or notes here"></textarea></label>
-</fieldset><div id="events"></div>
+</div>
+<div id="events"></div>
 <button class="add-btn" id="addEventBtn">+ Add Event</button>
 <button class="gen-btn" onclick="generateICS()">Generate ICS</button><footer>
   Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
