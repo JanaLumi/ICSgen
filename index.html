@@ -31,7 +31,8 @@
   <div class="row">
     <div class="col col-2"><label>Series Title <input type="text" id="seriesTitle" value="Event"></label></div>
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
-    <div class="col col-2"><label>Timezone <select id="seriesTimezone"><option value="">Select Timezone</option></select></label></div>
+    <div class="col col-2"><label>Timezone <input id="seriesTimezone" type="text" list="timezones"></label></div>
+<!--    <div class="col col-2"><label>Timezone <select id="seriesTimezone"><option value="">Select Timezone</option></select></label></div> -->
   </div>
   <div class="row">
     <div class="col col-2"><label>Default Start Time <input type="time" id="seriesStartTime"></label></div>
@@ -71,7 +72,7 @@ function addEvent() {
       <div class="row">
         <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
         <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
-        <div class="col col-2"><label>Timezone <input type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
+        <div class="col col-2"><label>Timezone <input id="evt-${id}-timezone" type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
       </div>
       <div class="row">
         <div class="col col-2"><label>Start Time <input type="time" name="start" value="${seriesStart}"></label></div>
