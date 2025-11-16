@@ -70,6 +70,8 @@ function addEvent() {
   const seriesTZ = escapeHTML(document.getElementById('seriesTimezone').value || defaultTZ);
   const seriesStart = document.getElementById('seriesStartTime').value || '';
   const seriesEnd = document.getElementById('seriesEndTime').value || '';
+  const seriesIsOnline = document.getElementById('isOnline-0')?.checked || false;
+  const seriesOnlineLink = document.querySelector('#default_head input[name="onlineLink"]')?.value || '';
 
   div.innerHTML = `
     <h3>Event ${eventCount}</h3>
@@ -80,6 +82,8 @@ function addEvent() {
         <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
         <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
         <div class="col col-2"><label>Timezone <input id="evt-${id}-timezone" type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
+         <div class="col col-2"><label>Online Event? <input type="checkbox" name="isOnline" ${seriesIsOnline ? 'checked' : ''}></label></div>
+         <div class="col col-2"><label>Online Link <input type="url" name="onlineLink" value="${seriesOnlineLink}" placeholder="https://"></label></div>
       </div>
       <div class="row">
         <div class="col col-2"><label>Start Time <input type="time" name="start" value="${seriesStart}"></label></div>
@@ -115,7 +119,7 @@ fetch('./timezones.json')
 
 // Optional: simulate Enter selecting the first visible match
 timezoneInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === 'Tab') {
+  if (e.key === 'Enter') {
     const val = timezoneInput.value.toLowerCase();
     const match = Array.from(timezoneDatalist.options).find(
       opt => opt.value.toLowerCase().startsWith(val) || opt.textContent.toLowerCase().startsWith(val)      
