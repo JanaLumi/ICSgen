@@ -91,8 +91,38 @@ function addEvent() {
   toggle.addEventListener('click', () => { content.style.display = content.style.display === 'block' ? 'none' : 'block'; });
 }
 
-// Load timezone JSON
+const timezoneInput = document.getElementById('seriesTimezone');
+const timezoneDatalist = document.getElementById('timezones');
+
+// Load your timezones JSON
 fetch('./timezones.json')
+  .then(res => res.json())
+  .then(data => {
+    data.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz.timezone; // actual value
+      option.textContent = `${tz.city} (${tz.countryName})`; // for display/reference
+      timezoneDatalist.appendChild(option);
+    });
+    timezoneInput.value = defaultTZ;
+  });
+
+// Optional: simulate Enter selecting the first visible match
+timezoneInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = timezoneInput.value.toLowerCase();
+    const match = Array.from(timezoneDatalist.options).find(
+      opt => opt.value.toLowerCase().startsWith(val)
+    );
+    if (match) {
+      timezoneInput.value = match.value;
+    }
+  }
+});
+
+  
+// Load timezone JSON
+/* fetch('./timezones.json')
   .then(res => res.json())
   .then(data => {
     timezonesData = data;
@@ -109,7 +139,7 @@ fetch('./timezones.json')
 
     seriesInput.value = defaultTZ;
   });
-
+*/
 /*
 fetch('./timezones.json').then(res => res.json()).then(data => {
   timezonesData = data;
