@@ -34,6 +34,12 @@
     <div class="col col-2"><label>Location <input type="text" id="seriesLocation" value="Location"></label></div>
     <div class="col col-2"><label>Timezone <input id="seriesTimezone" type="text" list="timezones" autocomplete="on"></label><datalist id="timezones"></datalist></div>
 <!--    <div class="col col-2"><label>Timezone <select id="seriesTimezone"><option value="">Select Timezone</option></select></label></div> -->
+    <div class="row">
+      <div class="col col-2"><label>Online Event?
+          <input type="checkbox" name="isOnline" id="isOnline-${eventCount}"></label></div>
+      <div class="col col-2"><label>Online Link
+          <input type="url" name="onlineLink" placeholder="https://"></label></div>
+    </div>
   </div>
   <div class="row">
     <div class="col col-2"><label>Default Start Time <input type="time" id="seriesStartTime"></label></div>
@@ -112,7 +118,7 @@ timezoneInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === 'Tab') {
     const val = timezoneInput.value.toLowerCase();
     const match = Array.from(timezoneDatalist.options).find(
-      opt => opt.value.toLowerCase().startsWith(val)
+      opt => opt.value.toLowerCase().startsWith(val) || opt.textContent.toLowerCase().startsWith(val)      
     );
     if (match) {
       timezoneInput.value = match.value;
