@@ -169,7 +169,10 @@ function generateICS() {
     const tz = evt.querySelector('input[name="timezone"]').value;
     const uid = `evt-${i}-${Date.now()}@icsgen`;
     const dtstamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
-    ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${desc}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
+    const isOnline = evt.querySelector('input[name="isOnline"]').checked;
+    const onlineLink = evt.querySelector('input[name="onlineLink"]').value;
+    const descFinal = isOnline && onlineLink ? `Online link: ${onlineLink}\n${desc}` : desc;
+    ics += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nSUMMARY:${title}\nDESCRIPTION:${descFinal}\nLOCATION:${location}\nDTSTART;TZID=${tz}:${date}T${start}\nDTEND;TZID=${tz}:${date}T${end}\nEND:VEVENT\n`;
   });
   ics += 'END:VCALENDAR';
   const blob = new Blob([ics], { type: 'text/calendar' });
