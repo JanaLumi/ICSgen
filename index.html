@@ -109,16 +109,18 @@ fetch('./timezones.json')
 
 // Optional: simulate Enter selecting the first visible match
 timezoneInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' || e.key === 'Tab') {
     const val = timezoneInput.value.toLowerCase();
     const match = Array.from(timezoneDatalist.options).find(
       opt => opt.value.toLowerCase().startsWith(val)
     );
     if (match) {
       timezoneInput.value = match.value;
+      e.preventDefault(); // prevents tabbing away before filling
     }
   }
 });
+
 
   
 // Load timezone JSON
