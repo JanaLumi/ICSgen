@@ -50,7 +50,7 @@
 <div id="events"></div>
 <button class="add-btn" id="addEventBtn">+ Add Event</button>
 <button class="gen-btn" onclick="generateICS()">Generate ICS</button><footer>
-  Made with 💚 by <a href="YOUR_PORTFOLIO_LINK" target="_blank">Your Name</a>
+  Made with ❄️ by <a href="https://janalumi.github.io" target="_blank">JanaLumi</a>
 </footer><script>
 const defaultTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Helsinki";
 let eventCount = 0;
@@ -81,7 +81,7 @@ function addEvent() {
       <div class="row">
         <div class="col col-2"><label>Title <input type="text" name="title" value="${seriesTitle}"></label></div>
         <div class="col col-2"><label>Location <input type="text" name="location" value="${seriesLocation}"></label></div>
-        <div class="col col-2"><label>Timezone <input id="evt-${id}-timezone" type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
+        <div class="col col-2"><label>Timezone <input id="evt-${eventCount}-timezone" type="text" name="timezone" list="timezones" value="${seriesTZ}"></label></div>
          <div class="col col-2"><label>Online Event? <input type="checkbox" name="isOnline" ${seriesIsOnline ? 'checked' : ''}></label></div>
          <div class="col col-2"><label>Online Link <input type="url" name="onlineLink" value="${seriesOnlineLink}" placeholder="https://"></label></div>
       </div>
