@@ -91,12 +91,31 @@ function addEvent() {
 }
 
 // Load timezone JSON
+fetch('./timezones.json')
+  .then(res => res.json())
+  .then(data => {
+    timezonesData = data;
+
+    const list = document.getElementById('timezones');
+    const seriesInput = document.getElementById('seriesTimezone');
+
+    data.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz.timezone;
+      option.textContent = `${tz.city} (${tz.countryName})`;
+      list.appendChild(option);
+    });
+
+    seriesInput.value = defaultTZ;
+  });
+
+/*
 fetch('./timezones.json').then(res => res.json()).then(data => {
   timezonesData = data;
   const seriesInput = document.getElementById('seriesTimezone');
   data.forEach(tz => { const option = document.createElement('option'); option.value = tz.timezone; option.textContent = `${tz.city} (${tz.countryName})`; seriesInput.appendChild(option); });
   seriesInput.value = defaultTZ;
-}).catch(err => console.error('Failed to load timezone JSON:', err));
+}).catch(err => console.error('Failed to load timezone JSON:', err)); */
 
 function generateICS() {
   const events = document.querySelectorAll('.event');
